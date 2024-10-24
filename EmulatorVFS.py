@@ -124,7 +124,17 @@ class Emulator:
                      self.text_area.insert(tk.END, f"{path} is not a file.\n")
          except KeyError:
              self.text_area.insert(tk.END, f"No such file: {path}\n")
-
+    def run_script(self, script_path):
+        if os.path.exists(script_path):
+            def run():
+                with open(script_path, 'r') as file:
+                    for line in file.readlines():
+                        self.execute_command(line.strip())
+                        time.sleep(2)  
+            threading.Thread(target=run).start()
+        
+        else:
+            self.text_area.insert(tk.END, f"Script file not found: {script_path}\n")
      
 if __name__=="__main__":
    emulator = Emulator(computer_name="MyComputer", fs_path="./vfs.tar")
