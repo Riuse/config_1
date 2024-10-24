@@ -89,8 +89,26 @@ class Emulator:
                  else:
                      self.text_area.insert(tk.END, f"No such directory: {path}\n")
                  
+    def exit(self):
+         with open(self.log_path, "wb") as f:
+             f.write(tostring(self.log))
+         self.root.quit()
+     
+    def clear(self):
+         self.text_area.delete(1.0, tk.END)
+     
+    def find(self, pattern):
+         with tarfile.open(self.fs_path, "r:*") as tar:
+             matches=[]
+             for member in tar.getmembers():
+                 if (pattern in member.name.split("/")[-1] and self.current_dir in member.name):
+                     matches.append(member.name)
+             if matches:
+                 self.text_area.insert(tk.END, "Found:\n" + "\n".join(matches) + "\n")
+             else:
+                 self.text_area.insert(tk.END, f"No files found matching pattern: {pattern}\n")
 
-
+     
 if __name__=="__main__":
    emulator = Emulator(computer_name="MyComputer", fs_path="./vfs.tar")
    emulator.run()
