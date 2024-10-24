@@ -19,7 +19,7 @@ class Emulator:
         self.fs_path = fs_path
         self.log_path = "./log.xml"
         self.script_path = "./script.sh"
-        self.current_dir = "./"
+        self.current_dir = "."
         self.root = tk.Tk()
         self.root.title(f"{self.computer_name} Emulator")
         self.root.configure(bg='black')
@@ -50,7 +50,7 @@ class Emulator:
     
         self.text_area.insert(tk.END, command + "\n")
         if cmd == 'ls':
-            self.ls()
+            self.ls(parts[1] if len(parts) > 1 else None)
         elif cmd == 'cd':
             self.cd(parts[1] if len(parts) > 1 else [])
         elif cmd == 'exit':
@@ -69,12 +69,18 @@ class Emulator:
             self.text_area.insert(tk.END, log_entry.text)
    
         
-    def ls(self):
+    def ls(self, path=None):
+        if path is None:
+            path = self.current_dir
+        else:
+            path = os.path.join(self.current_dir, path).replace("\\", "/")
+            print(path)
+    
         with tarfile.open(self.fs_path, "r:*") as tar:
             for member in tar.getmembers():
-                if member.name.startswith(self.current_dir) and \
-                    os.path.dirname(member.name) == self.current_dir:
-                    self.text_area.insert(tk.END, process_string(member.name, self.current_dir) + "\n")
+                if member.name.startswith(path) and \
+                    os.path.dirname(member.name) == path:
+                    self.text_area.insert(tk.END, process_string(member.name, path) + "\n")
                     
     def cd(self, path):
          if path == "..":
@@ -107,6 +113,8 @@ class Emulator:
                  self.text_area.insert(tk.END, "Found:\n" + "\n".join(matches) + "\n")
              else:
                  self.text_area.insert(tk.END, f"No files found matching pattern: {pattern}\n")
+
+     
     def uniq(self, path):
          if not path:
              self.text_area.insert(tk.END, "Usage: uniq <file_path>\n")
@@ -135,7 +143,6 @@ class Emulator:
         
         else:
             self.text_area.insert(tk.END, f"Script file not found: {script_path}\n")
-     
 if __name__=="__main__":
    emulator = Emulator(computer_name="MyComputer", fs_path="./vfs.tar")
    emulator.run()
