@@ -33,6 +33,50 @@ class Emulator:
         self.log = Element('log')
     def run(self):
         self.root.mainloop()
+    
+    def process_command(self, event):
+        command = self.entry.get()
+        self.entry.delete(0, tk.END)
+        self.execute_command(command)
+        self.text_area.insert(tk.END, f"{self.computer_name}:{self.current_dir}$ ","green")
+    
+    def execute_command(self, command):
+        parts = command.split()
+        if not parts:
+            return
+        cmd = parts[0]
+    
+        log_entry = SubElement(self.log, 'command', attrib={'input': command})
+    
+        self.text_area.insert(tk.END, command + "\n")
+        if cmd == 'ls':
+            self.ls()
+        elif cmd == 'cd':
+            self.cd(parts[1] if len(parts) > 1 else [])
+        elif cmd == 'exit':
+            self.exit()
+        elif cmd == 'clear':
+            self.clear()
+        elif cmd == 'find':
+            self.find(parts[1] if len(parts) > 1 else '.')
+        elif cmd == 'uniq':
+            self.uniq(parts[1] if len(parts) > 1 else '')
+        elif cmd == 'script':
+            self.run_script(self.script_path)
+            return
+        else:
+            log_entry.text = f"Command {cmd} not found.\n"
+            self.text_area.insert(tk.END, log_entry.text)
+   
+        
+    def ls(self):
+        with tarfile.open(self.fs_path, "r:*") as tar:
+            for member in tar.getmembers():
+                if member.name.startswith(self.current_dir) and \
+                    os.path.dirname(member.name) == self.current_dir:
+                    self.text_area.insert(tk.END, process_string(member.name, self.current_dir) + "\n")
+                    
+  
 if __name__=="__main__":
    emulator = Emulator(computer_name="MyComputer", fs_path="./vfs.tar")
    emulator.run()
