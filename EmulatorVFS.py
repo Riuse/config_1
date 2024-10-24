@@ -107,6 +107,23 @@ class Emulator:
                  self.text_area.insert(tk.END, "Found:\n" + "\n".join(matches) + "\n")
              else:
                  self.text_area.insert(tk.END, f"No files found matching pattern: {pattern}\n")
+    def uniq(self, path):
+         if not path:
+             self.text_area.insert(tk.END, "Usage: uniq <file_path>\n")
+             return
+     
+         try:
+             with tarfile.open(self.fs_path, "r") as tar:
+                 member = tar.getmember(self.current_dir+'/'+path)
+                 if member.isfile():
+                     file = tar.extractfile(member)
+                     lines = file.read().decode('utf-8').splitlines()
+                     unique_lines = set(lines)
+                     self.text_area.insert(tk.END, "\n".join(unique_lines) + "\n")
+                 else:
+                     self.text_area.insert(tk.END, f"{path} is not a file.\n")
+         except KeyError:
+             self.text_area.insert(tk.END, f"No such file: {path}\n")
 
      
 if __name__=="__main__":
