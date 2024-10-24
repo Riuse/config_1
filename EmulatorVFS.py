@@ -76,7 +76,21 @@ class Emulator:
                     os.path.dirname(member.name) == self.current_dir:
                     self.text_area.insert(tk.END, process_string(member.name, self.current_dir) + "\n")
                     
-  
+    def cd(self, path):
+         if path == "..":
+             if self.current_dir != "/":
+                 self.current_dir = "/".join(self.current_dir.split("/")[:-1]) or "/"
+         else:
+             new_path = os.path.join(self.current_dir, path).replace("\\", "/")
+             with tarfile.open(self.fs_path, "r") as tar:
+                 members = tar.getnames()
+                 if new_path in members:
+                     self.current_dir = new_path
+                 else:
+                     self.text_area.insert(tk.END, f"No such directory: {path}\n")
+                 
+
+
 if __name__=="__main__":
    emulator = Emulator(computer_name="MyComputer", fs_path="./vfs.tar")
    emulator.run()
