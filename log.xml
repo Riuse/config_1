@@ -1,0 +1,1 @@
+<log><command input="find test" /><command input="find .txt" /><command input="cd vfs" /><command input="cd test1" /><command input="find .txt" /><command input="clear" /><command input="exit" /></log>
